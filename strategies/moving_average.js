@@ -28,7 +28,7 @@ class movingAverage{
             ********************************************************/
             const time = await this.alpaca.getClock();
             if(!time.is_open){
-                await market_bot.waitForMarketToOpen();
+               // await market_bot.waitForMarketToOpen();
             }
 
             /*******************************************************
@@ -37,23 +37,24 @@ class movingAverage{
             
             var spyPosition;
             try{
-                spyPosition = await this.alpaca.getPosition('SPY');
+                const currentData = await this.alpaca.getPosition('SPY');
+		        spyPosition = currentData["qty"];   
             }
             catch(err){
                 spyPosition = 0;
             }
-            console.log('SPY Position: ',spyPosition['qty'])
+            console.log('SPY Position: ',spyPosition)
 
 
             //Gets Account Information
             const account = await this.alpaca.getAccount();
             //Setting the position Size to 10% of portfolio
-            var positionSize = account['portfolio_value'] * .1;
+            const positionSize = account['portfolio_value'] * .1;
             console.log("Position Size: " + positionSize);
             //Get the current Price of SPY to figure out the amount of shares we need to purchuse
             const currentPrice  = await market_bot.getPrice("minute",'SPY',1,"o");
             //Setting the Order Size (Number of shares)
-            var shareOrderSize = Math.round(positionSize / currentPrice[0]);
+            const shareOrderSize = Math.round(positionSize / currentPrice[0]);
             console.log("Share order size: " + shareOrderSize);
 
 
@@ -69,11 +70,11 @@ class movingAverage{
             //Part 2 (30 min Average)
             //Calculating the 30min moving average as MA30Avg
             const MA30  = await market_bot.getPrice("minute",'SPY',30,"o");
-            var MA30Avg = this.getAverage(MA30);
-            console.log("MA15= ",MA15Avg)
-            console.log("MA30= ",MA30Avg)
+            const MA30Avg = this.getAverage(MA30);
+            console.log("MA15 = ",MA15Avg);
+            console.log("MA30 = ",MA30Avg);
 
-            console.log(MA15Avg>MA30Avg)
+            console.log("MA15Avg > MA30Avg: " + MA15Avg>MA30Avg);
 
 
             /***************************************************
@@ -83,35 +84,31 @@ class movingAverage{
             if(spyPosition == 0) { 
                 if(MA15Avg>MA30Avg){ //if MA15 greater than MA30 buy 10% of portfolio
                     trading_bot.submitOrder(shareOrderSize,"SPY","buy");
-                } else{
+                } 
+                else{
                     trading_bot.submitOrder(shareOrderSize,"SPY","sell");
                 }
-
-            //If we have a postive number of shares of SPY (Meaning we are alreday long)    
-            } else if(spyPosition['qty'] > 0) { 
+            }
+            //If we have a postive number of shares of SPY (Meaning we are already long)    
+            else if(spyPosition > 0) { 
                 if(MA15Avg<MA30Avg){
                     // 1) Close Current Position
-                    trading_bot.sellAllOrders("SPY") // May need to fix this function
+                    trading_bot.sellAllCompanyStocks("SPY");
                     // 2) Open a Short Position with 10% of portfolio
                     trading_bot.submitOrder(shareOrderSize,"SPY","sell"); 
-                }else{
-                    continue
                 }
-
+            }
             //If we have a negative number of shares of SPY (Meaning we are alreday short)    
-            } else if(spyPosition['qty'] < 0){ 
+            else if(spyPosition < 0){ 
                 if(MA15Avg>MA30Avg){
                     // 1) Close Current Position
-                    trading_bot.sellAllOrders("SPY") // May need to fix this function
+                    trading_bot.sellAllCompanyStocks("SPY");
                     // 2) Open a Long Position with 10% of portfolio
                     trading_bot.submitOrder(shareOrderSize,"SPY","buy"); 
-                }else{
-                    continue
-               }
+                }
             } 
         }  
     }
-
     getAverage(dataArray){
         var Total = 0;
         var Avg = 0;
