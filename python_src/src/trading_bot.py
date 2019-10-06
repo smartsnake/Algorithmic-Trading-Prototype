@@ -5,7 +5,7 @@ from time import sleep
 class trading_bot():
     def __init__(self):
         passdata = None
-        with open('../credentials/data.json') as json_file:
+        with open('./credentials/data.json') as json_file:
             data = json.load(json_file)
         self.alpaca = tradeapi.REST(data['API_KEY'], data['API_SECRET'], data['APCA_API_BASE_URL'], 'v2')
         self.account = self.alpaca.get_account()
@@ -44,10 +44,10 @@ class trading_bot():
     
     #Sells all shares
     def closeAllPositions(self):
-        self.alpaca.closeAllPositions()
+        self.alpaca.close_all_positions()
         print("***** All positions have been closed *****")
     
     def cancelAllPendingOrders(self):
-        self.alpaca.cancelAllOrders()
+        self.alpaca.cancel_all_orders()
         print("***** All pending orders have been canceled *****")
     

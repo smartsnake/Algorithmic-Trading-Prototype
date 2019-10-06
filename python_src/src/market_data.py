@@ -2,10 +2,10 @@ import alpaca_trade_api as tradeapi
 import json
 from time import sleep
 
-class market_bot():
+class market_data():
     def __init__(self):
         data = None
-        with open('../credentials/data.json') as json_file:
+        with open('./credentials/data.json') as json_file:
             data = json.load(json_file)
         self.alpaca = tradeapi.REST(data['API_KEY'], data['API_SECRET'], data['APCA_API_BASE_URL'], 'v2')
     
@@ -15,9 +15,7 @@ class market_bot():
         dataArray = []
         for element in desiredData:
             dataArray.push(element[dataType])
-            #console.log(desiredData[i]);
-        
-        #console.log(dataArray);
+            
         return dataArray
     
     def getShares(self, symbol):

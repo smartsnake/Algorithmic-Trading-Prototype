@@ -1,7 +1,7 @@
 import alpaca_trade_api as tradeapi
 import json
 from src.trading_bot import trading_bot
-from src.market_bot import market_bot
+from src.market_data import market_data
 
 
 debug = True
@@ -10,7 +10,7 @@ class simple_moving_average():
     def __init__(self):
 
         data = None
-        with open('../credentials/data.json') as json_file:
+        with open('./credentials/data.json') as json_file:
             data = json.load(json_file)
         self.alpaca = tradeapi.REST(data['API_KEY'], data['API_SECRET'], data['APCA_API_BASE_URL'], 'v2')
 
@@ -54,7 +54,7 @@ class simple_moving_average():
             positionSize = account['portfolio_value'] * .1
             print(f'Position Size: {positionSize}')
             #Get the current Price of SPY to figure out the amount of shares we need to purchuse
-            currentPrice  = market_bot.getPrice("minute",'SPY',1,"o")
+            currentPrice  = market_data.getPrice("minute",'SPY',1,"o")
             #Setting the Order Size (Number of shares)
             shareOrderSize = int(positionSize / currentPrice[0])
             print(f'Share order size: {shareOrderSize}')
@@ -64,12 +64,12 @@ class simple_moving_average():
             # *******************************************************/
             #Part 1 (15 min Average)
             #Calculating the 15min moving average as MA15Avg
-            MA15  = market_bot.getPrice("minute",'SPY',15,"o")
+            MA15  = market_data.getPrice("minute",'SPY',15,"o")
             MA15Avg = self.getAverage(MA15)
     
             #Part 2 (30 min Average)
             #Calculating the 30min moving average as MA30Avg
-            MA30  = market_bot.getPrice("minute",'SPY',30,"o")
+            MA30  = market_data.getPrice("minute",'SPY',30,"o")
             MA30Avg = self.getAverage(MA30)
             if debug:
                 print(f'MA15 = {MA15Avg}')
